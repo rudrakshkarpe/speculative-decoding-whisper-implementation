@@ -207,24 +207,6 @@ speculative-whisper/
 └── requirements.txt
 ```
 
-
-## Citation
-
-Based on speculative decoding research:
-
-```bibtex
-@article{leviathan2023fast,
-  title={Fast Inference from Transformers via Speculative Decoding},
-  author={Leviathan, Yaniv and Kalman, Matan and Matias, Yossi},
-  journal={arXiv preprint arXiv:2211.17192},
-  year={2023}
-}
-```
-
-## License
-
-MIT License - builds on OpenAI Whisper
-
 ## Acknowledgments
 
 - OpenAI Whisper team
