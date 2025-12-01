@@ -56,6 +56,11 @@ class DraftModel(ABC):
         pass
     
     @abstractmethod
+    def install_kv_cache(self):
+        """Install KV cache hooks for the model."""
+        pass
+    
+    @abstractmethod
     def reset_cache(self):
         """Reset any internal caching state."""
         pass
@@ -77,6 +82,7 @@ class DistilWhisperDraft(DraftModel):
         self.model = draft_model
         self.kv_cache = {}
         self.hooks = []
+        self.cache_installed = False
         
     def generate_draft(
         self,
@@ -89,8 +95,7 @@ class DistilWhisperDraft(DraftModel):
         
         Args:
             tokens: Current token sequence [batch_size, seq_len]
-            audio_features: Encoded audio features from TARGET model [batch_size, n_ctx, dim]
-                           Note: We need to re-encode with draft model's encoder
+            audio_features: Encoded audio features from draft model [batch_size, n_ctx, dim]
             n_tokens: Number of tokens to generate
             temperature: Sampling temperature
             
@@ -100,13 +105,12 @@ class DistilWhisperDraft(DraftModel):
         draft_tokens = []
         current_tokens = tokens.clone()
         
-        # For simplicity and correctness, we'll generate tokens autoregressively
-        # without KV caching in the draft stage. This is still fast since
-        # the draft model is much smaller than the target model.
-        
+        # Use KV caching for draft generation if installed
+        # For now, we generate all tokens without KV cache to avoid offset issues
+        # This is still fast since the draft model is much smaller
         with torch.no_grad():
-            for _ in range(n_tokens):
-                # Get logits for all tokens (no KV cache for draft generation)
+            for i in range(n_tokens):
+                # Get logits (without KV cache for now to avoid complexity)
                 logits = self.model.decoder(
                     current_tokens, audio_features, kv_cache=None
                 )
@@ -147,6 +151,12 @@ class DistilWhisperDraft(DraftModel):
             logits = self.model.decoder(tokens, audio_features, kv_cache=None)
         return logits
     
+    def install_kv_cache(self):
+        """Install KV cache hooks for the draft model."""
+        if not self.cache_installed:
+            self.kv_cache, self.hooks = self.model.install_kv_cache_hooks()
+            self.cache_installed = True
+    
     def reset_cache(self):
         """Reset the KV cache."""
         # Remove hooks
@@ -156,6 +166,7 @@ class DistilWhisperDraft(DraftModel):
         # Clear cache
         self.kv_cache = {}
         self.hooks = []
+        self.cache_installed = False
 
 
 class LayerDropoutDraft(DraftModel):
@@ -176,6 +187,7 @@ class LayerDropoutDraft(DraftModel):
         self.model = target_model
         self.kv_cache = {}
         self.hooks = []
+        self.cache_installed = False
         
         if layers_to_use is None:
             # Use first half of layers by default
@@ -205,18 +217,16 @@ class LayerDropoutDraft(DraftModel):
         draft_tokens = []
         current_tokens = tokens.clone()
         
-        # Install KV cache
-        if not self.kv_cache:
-            self.kv_cache, self.hooks = self.model.install_kv_cache_hooks()
-        
         with torch.no_grad():
-            for _ in range(n_tokens):
+            for i in range(n_tokens):
                 # Get logits with layer dropout
-                if len(draft_tokens) == 0:
+                if i == 0:
+                    # First token: process all
                     logits = self._forward_with_layer_dropout(
                         current_tokens, audio_features
                     )
                 else:
+                    # Subsequent tokens: only process last token (cached)
                     logits = self._forward_with_layer_dropout(
                         current_tokens[:, -1:], audio_features
                     )
@@ -276,6 +286,12 @@ class LayerDropoutDraft(DraftModel):
             logits = self._forward_with_layer_dropout(tokens, audio_features)
         return logits
     
+    def install_kv_cache(self):
+        """Install KV cache hooks for the draft model (layer dropout)."""
+        if not self.cache_installed:
+            self.kv_cache, self.hooks = self.model.install_kv_cache_hooks()
+            self.cache_installed = True
+    
     def reset_cache(self):
         """Reset the KV cache."""
         for hook in self.hooks:
@@ -283,3 +299,4 @@ class LayerDropoutDraft(DraftModel):
         
         self.kv_cache = {}
         self.hooks = []
+        self.cache_installed = False
