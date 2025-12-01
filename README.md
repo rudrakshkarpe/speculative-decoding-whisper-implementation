@@ -2,6 +2,12 @@
 
 Implementation of speculative decoding for OpenAI's Whisper ASR model using **Whisper Tiny** as the draft model and **Whisper Large V3** as the target model. This technique accelerates inference while maintaining identical output quality.
 
+## System Architecture
+
+<img width="1429" height="198" alt="image" src="https://github.com/user-attachments/assets/7745f8f3-e20a-41d5-97d7-e54265f5ac3d" />
+
+
+
 ## Overview
 
 This project implements the assignment requirements for speculative decoding on Whisper:
