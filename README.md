@@ -4,7 +4,11 @@ Implementation of speculative decoding for OpenAI's Whisper ASR model using **Wh
 
 ## System Architecture
 
-<img width="1429" height="198" alt="image" src="https://github.com/user-attachments/assets/7745f8f3-e20a-41d5-97d7-e54265f5ac3d" />
+<!-- <img width="1429" height="198" alt="image" src="https://github.com/user-attachments/assets/7745f8f3-e20a-41d5-97d7-e54265f5ac3d" /> -->
+
+<img width="942" height="559" alt="image" src="https://github.com/user-attachments/assets/dac87d38-b62b-4e93-97de-1572183a6888" />
+
+
 
 
 
@@ -203,73 +207,6 @@ speculative-whisper/
 └── requirements.txt
 ```
 
-## Implementation Details
-
-### Draft Model Strategies
-
-**DistilWhisper** (Primary - As Per Assignment):
-- Uses Whisper Tiny as draft for Large V3
-- Separate smaller model for fast generation
-- Best speedup when models differ significantly in size
-
-**LayerDropout** (Additional):
-- Skips layers in the target model
-- Lower memory footprint
-- Available but not primary focus
-
-### Key Features
-
-- **Rejection Sampling**: Ensures mathematically correct output distribution
-- **Adaptive Gamma**: Dynamically adjusts speculation depth
-- **Batch Processing**: Handles multiple audio files
-- **Statistics Tracking**: Monitor acceptance rates and speedup
-
-## Assignment Requirements Checklist
-
-### ✅ Completed
-
-- [x] Load Whisper Tiny and Large V3
-- [x] Implement speculative decoding (Tiny generates draft, Large V3 refines)
-- [x] Compare speed: Speculative vs Standard Large V3
-- [x] Compare accuracy: WER metrics
-- [x] Python API for batch transcription
-- [x] GPU/CPU device configuration
-- [x] Config to tune draft/final step lengths (gamma)
-
-### Optional (Not Implemented)
-
-- [ ] Beam search during speculative decoding
-- [ ] Top-p sampling during speculative decoding  
-- [ ] REST API
-
-## Testing
-
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run specific test
-pytest tests/test_config.py -v
-
-# With coverage
-pytest tests/ --cov=src --cov-report=html
-```
-
-## Troubleshooting
-
-### Models Not Loading
-- Ensure Whisper is installed: `pip install -U openai-whisper`
-- Large V3 requires ~10GB disk space
-
-### Out of Memory
-- Use CPU instead of GPU: `device="cpu"`
-- Process shorter audio segments
-- Reduce gamma parameter
-
-### Slower Than Expected
-- Ensure GPU is available and being used
-- Check acceptance rate (should be >40%)
-- Try adjusting gamma (2-6 typically works well)
 
 ## Citation
 
