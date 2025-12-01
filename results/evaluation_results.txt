@@ -1,0 +1,17 @@
+SPECULATIVE DECODING EVALUATION RESULTS
+================================================================================
+
+PERFORMANCE METRICS
+--------------------------------------------------------------------------------
+Average Speculative Time: 3.46s
+Average Standard Time: 3.63s
+Speedup: 1.05x
+
+Acceptance Rate: 77.78%
+Tokens per Iteration: 3.11
+
+Standard WER: 13.64%
+Speculative WER: 18.18%
+WER Difference: +4.55%
+
+================================================================================

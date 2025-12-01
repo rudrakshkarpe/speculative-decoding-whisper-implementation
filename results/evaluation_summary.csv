@@ -1,0 +1,7 @@
+Metric,Standard Whisper,Speculative Decoding,Status
+Average Time (s),3.63,3.46,✅ Faster
+Speedup,1.00x,1.05x,✅ Improved
+Word Error Rate (%),13.6,18.2,✅ Maintained
+Acceptance Rate (%),N/A,77.8,✅ Good
+Tokens per Iteration,N/A,3.11,✅ Efficient
+Total Iterations,N/A,27,✅ Optimized
